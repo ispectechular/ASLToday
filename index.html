@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Today’s ASL Lesson</title>
+
+  <!-- Lexend font -->
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --slate-blue:#4A7A92;
+      --teal-blue:#5A94B1;
+      --muted-green:#879B8D;
+      --soft-purple:#756A85;
+      --lilac-gray:#8E869F;
+      --light-blue:#C2D6E1;
+      --sage-green:#A0B4A7;
+      --soft-gray-green:#D3DDD7;
+      --pale-purple:#C4BFD0;
+
+      --bg: rgba(255,255,255,0.7);
+      --radius: 18px;
+      --shadow: 0 10px 20px rgba(0,0,0,0.1);
+      --scale: 1;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: transparent;
+      font-family: 'Lexend', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .wrap {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 100%;
+      background: var(--bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: calc(18px * var(--scale));
+      display: flex;
+      flex-direction: column;
+      gap: calc(12px * var(--scale));
+      animation: breathe 4s ease-in-out infinite alternate;
+    }
+    @media (prefers-reduced-motion: reduce){ .card{ animation: none; } }
+    @keyframes breathe { from{ box-shadow: var(--shadow);} to{ box-shadow: 0 12px 26px rgba(0,0,0,0.12);} }
+
+    .title {
+      margin: 0;
+      color: var(--slate-blue);
+      font-weight: 700;
+      font-size: calc(2rem * var(--scale));
+      text-align: center;
+    }
+
+    .player-shell{
+      width: 100%;
+      border-radius: calc(14px * var(--scale));
+      overflow: hidden;
+      background: #000;
+      position: relative;
+      aspect-ratio: 16 / 9;
+    }
+    .player-shell::before{ content:""; display:block; padding-top:56.25%; }
+    .player-shell > #player { position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+    .word {
+      margin: 0;
+      text-align: center;
+      color: var(--muted-green);
+      font-weight: 600;
+      font-size: calc(1.4rem * var(--scale));
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: calc(10px * var(--scale));
+      margin-top: calc(2px * var(--scale));
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: calc(12px * var(--scale));
+      padding: calc(8px * var(--scale)) calc(12px * var(--scale));
+      font-weight: 600;
+      font-size: calc(0.95rem * var(--scale));
+      color: white;
+      background: var(--soft-purple);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:focus { outline: 2px solid var(--light-blue); outline-offset: 2px; }
+
+    .modal { position: fixed; inset: 0; display: none; }
+    .modal[aria-hidden="false"] { display: block; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.2); }
+    .modal-card {
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: min(92vw, 480px);
+      background: var(--bg); backdrop-filter: blur(10px);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: calc(18px * var(--scale));
+      display: flex; flex-direction: column; gap: calc(10px * var(--scale));
+    }
+    .modal-title { color: var(--slate-blue); font-size: calc(1.4rem * var(--scale)); font-weight: 700; }
+    .modal-label { color: var(--muted-green); font-weight: 600; font-size: calc(0.95rem * var(--scale)); display: flex; flex-direction: column; gap: calc(6px * var(--scale)); }
+    .modal-label.small { width: 48%; }
+    .modal-row { display: flex; gap: calc(10px * var(--scale)); justify-content: space-between; }
+    .modal-input { font-family: 'Lexend', system-ui, sans-serif; font-size: calc(1rem * var(--scale)); padding: calc(8px * var(--scale)) calc(10px * var(--scale)); border-radius: calc(10px * var(--scale)); border: 1px solid #e5e7eb; background: #fff; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: calc(10px * var(--scale)); }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="wrap">
+    <main class="card" role="region" aria-label="Today’s ASL Lesson video">
+      <h1 class="title">Today’s ASL Lesson</h1>
+
+      <div class="player-shell">
+        <div id="player" title="ASL demonstration video"></div>
+      </div>
+
+      <h2 class="word" id="aslWord">HELLO</h2>
+
+      <div class="controls" aria-label="Video controls">
+        <button class="btn" id="toggleMute" type="button">Unmute</button>
+        <button class="btn" id="replay" type="button">Replay</button>
+        <button class="btn" id="change" type="button" title="Change video/lesson">Change</button>
+      </div>
+
+      <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+        <div class="modal-backdrop" id="modalClose"></div>
+        <div class="modal-card">
+          <h3 class="modal-title" id="modalTitle">Update Today’s ASL Lesson</h3>
+          <label class="modal-label">YouTube link or ID
+            <input class="modal-input" id="inputId" placeholder="https://youtu.be/abcd1234 or abcd1234" />
+          </label>
+          <label class="modal-label">Lesson label
+            <input class="modal-input" id="inputWord" placeholder="e.g., Letter A" />
+          </label>
+          <div class="modal-row">
+            <label class="modal-label small">Start (sec)
+              <input class="modal-input" id="inputStart" type="number" min="0" step="1" />
+            </label>
+            <label class="modal-label small">End (sec)
+              <input class="modal-input" id="inputEnd" type="number" min="0" step="1" />
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button class="btn" id="modalCancel" type="button">Cancel</button>
+            <button class="btn" id="modalSave" type="button">Save</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- CONFIG + scaling -->
+  <script>
+    const LS_KEY = 'aslWidgetConfig';
+    const config = (() => {
+      let base = { videoId: "X3w9yoXQ3bY", word: "HELLO", start: null, end: null };
+      try { const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (saved && saved.videoId) base = { ...base, ...saved }; } catch(e){}
+      const params = new URLSearchParams(location.search);
+      if (params.get("id"))   base.videoId = params.get("id");
+      if (params.get("word")) base.word    = params.get("word");
+      if (params.get("start")) base.start = Number(params.get("start"));
+      if (params.get("end"))   base.end   = Number(params.get("end"));
+      return base;
+    })();
+
+    document.addEventListener('DOMContentLoaded', () => { document.getElementById("aslWord").textContent = config.word || "—"; });
+
+    (function setupResize(){
+      const wrap = document.getElementById('wrap');
+      const ro = new ResizeObserver(entries => { for (const entry of entries){ const { width } = entry.contentRect; const scale = Math.max(0.6, Math.min(2.2, width / 420)); wrap.style.setProperty('--scale', scale);} });
+      ro.observe(wrap);
+    })();
+  </script>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player; let loopingSegment = false;
+    function onYouTubeIframeAPIReady(){
+      loopingSegment = Number.isFinite(config.start) && Number.isFinite(config.end) && config.end > config.start;
+      const base = { autoplay:1, mute:1, loop:1, controls:0, modestbranding:1, rel:0, playsinline:1 };
+      const vars = loopingSegment ? { ...base, start: Math.max(0, Math.floor(config.start)) } : { ...base, playlist: config.videoId };
+      player = new YT.Player('player', { videoId: config.videoId, playerVars: vars, events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange } });
+    }
+    function onPlayerReady(){ document.getElementById('toggleMute').textContent = player.isMuted()? 'Unmute':'Mute'; if(loopingSegment){ try{ player.seekTo(config.start,true); player.playVideo(); }catch(e){} } }
+    function onPlayerStateChange(e){ if(loopingSegment && e.data===YT.PlayerState.PLAYING){ clearInterval(window.__seg); window.__seg=setInterval(()=>{ try{ if(player.getCurrentTime()>=config.end) player.seekTo(config.start,true);}catch(e){} },200);} if(!loopingSegment && e.data===YT.PlayerState.ENDED){ try{ player.seekTo(0,true); player.playVideo(); }catch(e){} } if(e.data===YT.PlayerState.ENDED && loopingSegment){ try{ player.seekTo(config.start,true); player.playVideo(); }catch(e){} }}
+
+    document.getElementById('toggleMute').addEventListener('click',()=>{ if(!player)return; if(player.isMuted()){player.unMute();document.getElementById('toggleMute').textContent='Mute';} else{player.mute();document.getElementById('toggleMute').textContent='Unmute';}});
+    document.getElementById('replay').addEventListener('click',()=>{ if(!player)return; try{ if(loopingSegment && Number.isFinite(config.start)){ player.seekTo(config.start,true);} else{ player.seekTo(0,true);} player.playVideo(); }catch(e){} });
+
+    const modal=document.getElementById('modal');
+    const openBtn=document.getElementById('change');
+    const closeEls=[document.getElementById('modalClose'),document.getElementById('modalCancel')];
+    const saveBtn=document.getElementById('modalSave');
+    const inputId=document.getElementById('inputId');
+    const inputWord=document.getElementById('inputWord');
+    const inputStart=document.getElementById('inputStart');
+    const inputEnd=document.getElementById('inputEnd');
+
+    function parseYouTubeId(v){ if(!v)return ''; const m=v.match(/(?:v=|\.be\/|embed\/)([A-Za-z0-9_-]{11})/); if(m)return m[1]; return /^[A-Za-z0-9_-]{11}$/.test(v)? v:''; }
+    function openModal(){ inputId.value=config.videoId||''; inputWord.value=config.word||''; inputStart.value=Number.isFinite(config.start)?String(config.start):''; inputEnd.value=Number.isFinite(config.end)?String(config.end):''; modal.setAttribute('aria-hidden','false'); }
+    function closeModal(){ modal.setAttribute('aria-hidden','true'); }
+    openBtn.addEventListener('click',openModal); closeEls.forEach(el=>el.addEventListener('click',closeModal));
+    saveBtn.addEventListener('click',()=>{ const vid=parseYouTubeId(inputId.value.trim()); const lbl=inputWord.value.trim()||'—'; const s=inputStart.value.trim(); const e=inputEnd.value.trim(); config.videoId=vid||config.videoId; config.word=lbl; config.start=s===''?null:Math.max(0,Number(s)); config.end=e===''?null:Math.max(0,Number(e)); try{ localStorage.setItem(LS_KEY,JSON.stringify(config)); }catch(_){} document.getElementById('aslWord').textContent=config.word||'—'; loopingSegment=Number.isFinite(config.start)&&Number.isFinite(config.end)&&config.end>config.start; try{ if(loopingSegment){ player.loadVideoById({ videoId: config.videoId, startSeconds: config.start }); } else { player.loadVideoById({ videoId: config.videoId, startSeconds: 0 }); } if(player.isMuted()===false) player.mute(); player.playVideo(); }catch(e){} closeModal(); });
+  </script>
+</body>
+</html>
