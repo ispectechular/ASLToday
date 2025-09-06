@@ -142,7 +142,6 @@
 
       <div class="controls" aria-label="Video controls">
         <button class="btn" id="toggleMute" type="button">Unmute</button>
-        <button class="btn" id="replay" type="button">Replay</button>
         <button class="btn" id="change" type="button" title="Change video/lesson">Change</button>
       </div>
 
@@ -209,7 +208,6 @@
     function onPlayerStateChange(e){ if(loopingSegment && e.data===YT.PlayerState.PLAYING){ clearInterval(window.__seg); window.__seg=setInterval(()=>{ try{ if(player.getCurrentTime()>=config.end) player.seekTo(config.start,true);}catch(e){} },200);} if(!loopingSegment && e.data===YT.PlayerState.ENDED){ try{ player.seekTo(0,true); player.playVideo(); }catch(e){} } if(e.data===YT.PlayerState.ENDED && loopingSegment){ try{ player.seekTo(config.start,true); player.playVideo(); }catch(e){} }}
 
     document.getElementById('toggleMute').addEventListener('click',()=>{ if(!player)return; if(player.isMuted()){player.unMute();document.getElementById('toggleMute').textContent='Mute';} else{player.mute();document.getElementById('toggleMute').textContent='Unmute';}});
-    document.getElementById('replay').addEventListener('click',()=>{ if(!player)return; try{ if(loopingSegment && Number.isFinite(config.start)){ player.seekTo(config.start,true);} else{ player.seekTo(0,true);} player.playVideo(); }catch(e){} });
 
     const modal=document.getElementById('modal');
     const openBtn=document.getElementById('change');
@@ -228,3 +226,4 @@
   </script>
 </body>
 </html>
+
